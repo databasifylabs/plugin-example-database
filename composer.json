@@ -1,7 +1,7 @@
 {
     "name": "databasifylabs/plugin-example-database",
-    "description": "Example Databasify plugin: a community engine with its own driver, running on the engine-template image.",
-    "version": "2.0.0",
+    "description": "Example Databasify plugin: a small SQLite engine with its own driver and flat scripts, for engine authors to copy.",
+    "version": "3.0.0",
     "type": "library",
     "license": "Apache-2.0",
     "autoload": {

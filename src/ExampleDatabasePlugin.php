@@ -9,41 +9,27 @@ use App\Plugins\AbstractPlugin;
 
 final class ExampleDatabasePlugin extends AbstractPlugin
 {
-    private const string ID = 'example';
-
-    private const array ENV_KEYS = ['host' => 'REDIS_HOST', 'port' => 'REDIS_PORT', 'username' => null, 'password' => 'REDIS_PASSWORD', 'database' => null];
-
     public function boot(): void
     {
-        $this->databasify()->database(self::ID)
-            ->label('Example Cache')
-            ->category('Caching')
+        $this->loadViewsFrom(__DIR__.'/../resources/scripts', ExampleDriver::ID);
+
+        $this->databasify()->database(ExampleDriver::ID)
+            ->label('Example Engine')
+            ->category('Application')
             ->image('ghcr.io/databasifylabs/databasify-example')
-            ->versions('9', [['value' => '9', 'label' => 'Example Cache (Valkey 9)']])
-            ->connection(
-                $this->connectionVia('valkey-cli --tls --insecure -u rediss://{username}:{password}@{host}:{port}'),
-                withPublicCertificate: $this->connectionVia('valkey-cli --tls -u rediss://{username}:{password}@{host}:{port}'),
-            )
-            ->migrationSource(6379, credentialsRequired: false, selectsDatabases: false)
-            ->readOnlyNodesVote()
-            ->persistenceChoice()
-            ->publicCertificate()
-            ->failoverHint('Sentinel needs three voting nodes to fail over on its own. Add a standby or a read-only node.')
+            ->versions('13', [['value' => '13', 'label' => 'Example (SQLite 3)']])
+            ->connection(new ConnectionProfile(
+                uriScheme: 'example',
+                uriQuery: '',
+                tlsParameter: 'tls',
+                tlsMode: 'on',
+                command: 'openssl s_client -quiet -connect {host}:{port}',
+                fixedUsername: null,
+                selectsDatabase: true,
+                envKeys: ['host' => 'EXAMPLE_HOST', 'port' => 'EXAMPLE_PORT', 'username' => 'EXAMPLE_USERNAME', 'password' => 'EXAMPLE_PASSWORD', 'database' => 'EXAMPLE_DATABASE'],
+                commandNote: 'The example answers with a banner only. Its users and databases are managed through Databasify.',
+            ))
             ->driver(ExampleDriver::class)
             ->register();
-    }
-
-    private function connectionVia(string $command): ConnectionProfile
-    {
-        return new ConnectionProfile(
-            uriScheme: 'rediss',
-            uriQuery: '',
-            tlsParameter: 'tls',
-            tlsMode: 'on',
-            command: $command,
-            fixedUsername: 'default',
-            selectsDatabase: false,
-            envKeys: self::ENV_KEYS,
-        );
     }
 }
