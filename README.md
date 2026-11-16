@@ -23,7 +23,7 @@ The example is for reading and copying. It holds toy data and does not replicate
 ## File layout
 
 ```
-composer.json                          name, version, autoload and extra.databasify
+composer.json                          name, version, author, autoload and extra.databasify
 src/ExampleDatabasePlugin.php          registers the engine and its scripts
 src/ExampleDriver.php                  facts, groups, query runner and quoting
 src/SqliteSql.php                      SqlQuoting: doubled single quotes, double-quoted names
@@ -60,6 +60,7 @@ $this->databasify()->database(ExampleDriver::ID)
 
 - `extra.databasify.engines` in `composer.json` (`["example"]`) lists every engine id the plugin registers. Databasify reads it before any plugin code runs and asks the admin to confirm a community engine.
 - `extra.databasify.requires` (`^0.2`): drivers arrived in Databasify 0.2.
+- `authors[0]`: the Plugins page shows its `name` under the plugin and links it to its `homepage`.
 - `image()`: Databasify picks the newest release tag of the database's line and pins its digest. The image's `io.databasify.engine` label must equal the engine id: it names the container (`databasify-example`) and its data folder (`/srv/example`).
 - `versions()`: each line is a tag prefix in the image. The template's line is `13` because its base is Debian 13.
 
