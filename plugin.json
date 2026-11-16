@@ -1,0 +1,16 @@
+{
+    "key": "databasifylabs/example-database",
+    "name": "Example Database",
+    "version": "4.0.0",
+    "author": {
+        "name": "Databasify",
+        "url": "https://github.com/databasifylabs"
+    },
+    "class": "Databasify\\ExampleDatabase\\ExampleDatabasePlugin",
+    "autoload": {
+        "Databasify\\ExampleDatabase\\": "src/"
+    },
+    "requires": "^0.2",
+    "icon": "icon.svg",
+    "engine": "example"
+}

@@ -23,7 +23,7 @@ The example is for reading and copying. It holds toy data and does not replicate
 ## File layout
 
 ```
-composer.json                          name, version, author, autoload and extra.databasify
+plugin.json                            key, name, version, author, class, autoload, requires, icon and engine
 src/ExampleDatabasePlugin.php          registers the engine and its scripts
 src/ExampleDriver.php                  facts, groups, query runner and quoting
 src/SqliteSql.php                      SqlQuoting: doubled single quotes, double-quoted names
@@ -58,8 +58,9 @@ $this->databasify()->database(ExampleDriver::ID)
     ->register();
 ```
 
-- `extra.databasify.engines` in `composer.json` (`["example"]`) lists every engine id the plugin registers. Databasify reads it before any plugin code runs and asks the admin to confirm a community engine.
-- `extra.databasify.requires` (`^0.2`): drivers arrived in Databasify 0.2.
+- `key` (`databasifylabs/example-database`) identifies the plugin; its files live in `storage/plugins/databasifylabs/example-database`. `name` is what the Plugins page shows, and `author` is shown under it, linked to its `url`.
+- `engine` (`example`) is the one engine id the plugin registers. Databasify reads it before any plugin code runs and asks the admin to confirm a community engine; plugins from the `databasifylabs` GitHub organization skip that warning.
+- `requires` (`^0.2`): drivers and `plugin.json` arrived in Databasify 0.2.
 - `authors[0]`: the Plugins page shows its `name` under the plugin and links it to its `homepage`.
 - `image()`: Databasify picks the newest release tag of the database's line and pins its digest. The image's `io.databasify.engine` label must equal the engine id: it names the container (`databasify-example`) and its data folder (`/srv/example`).
 - `versions()`: each line is a tag prefix in the image. The template's line is `13` because its base is Debian 13.
@@ -115,7 +116,7 @@ echo 'The example server is ready.'
 ## Turning it into a real engine
 
 1. **Images:** create a repository from [`databasifylabs/engine-template`](https://github.com/databasifylabs/engine-template), point its base at your database's official image and publish `ghcr.io/<owner>/databasify-<engine>`. Make the package public, because Databasify pulls images without credentials.
-2. **Plugin:** copy this repository, change the engine id in `ExampleDriver::ID` and `extra.databasify.engines`, and set the label, category, image, lines and connection.
+2. **Plugin:** copy this repository, set your own `key`, change the engine id in `ExampleDriver::ID` and `engine` in `plugin.json`, and set the label, category, image, lines and connection.
 3. **Driver:** keep the groups and replace the scripts: your client in `_query`, your processes in the manifest `ExampleNodes::configure` builds, your statements in the query views, and real replication in `ExampleCluster`. Write your own `SqlQuoting` if your database quotes differently.
 
 Read more in [Writing plugins](https://docs.databasify.io/plugins/writing-plugins/) and Databasify's [`adding-database-engine`](https://github.com/databasifylabs/databasify/tree/0.x/.claude/skills/adding-database-engine) skill.
