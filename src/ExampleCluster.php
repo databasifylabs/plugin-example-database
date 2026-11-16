@@ -29,10 +29,11 @@ final readonly class ExampleCluster implements Cluster
 
     public function failover(string $targetIp): void
     {
-        $this->driver->node->database->nodesWithServers()->each(fn (DatabaseNode $node) => rescue(
-            fn () => $this->state->saveRole(new ExampleDriver($node), $node->privateIp() === $targetIp ? NodeRole::Primary : NodeRole::Replica),
-            report: false,
-        ));
+        $nodes = $this->driver->node->database->nodesWithServers();
+        $isTarget = fn (DatabaseNode $node): bool => $node->privateIp() === $targetIp;
+
+        $nodes->filter($isTarget)->each(fn (DatabaseNode $node) => $this->state->saveRole(new ExampleDriver($node), NodeRole::Primary));
+        $nodes->reject($isTarget)->each(fn (DatabaseNode $node) => rescue(fn () => $this->state->saveRole(new ExampleDriver($node), NodeRole::Replica), report: false));
     }
 
     public function forceQuorum(bool $othersDown): void {}

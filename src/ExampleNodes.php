@@ -12,6 +12,7 @@ use App\Engines\Data\NodeConfig;
 use App\Engines\Data\NodeMetrics;
 use App\Engines\Data\Operation;
 use App\Engines\Data\Secrets;
+use App\Engines\Drivers\Support\IndentedJson;
 use App\Engines\Drivers\Support\NodeState;
 use App\Engines\Drivers\TlsPair;
 use App\Enums\Databases\GrantAccess;
@@ -27,9 +28,23 @@ final readonly class ExampleNodes implements Nodes
     public function configure(NodeConfig $config): void
     {
         $this->driver->run('example::nodes.configure', [
-            'manifest' => $this->driver->script('example::files.processes'),
+            'manifest' => IndentedJson::of(['processes' => [[
+                'name' => ExampleDriver::SERVER,
+                'argv' => ['socat', "OPENSSL-LISTEN:{$this->driver->node->database->clientPort()},reuseaddr,fork,cert=/srv/example/tls/node.pem,cafile=/srv/example/tls/ca.pem,verify=0", 'SYSTEM:echo example ready'],
+                'user' => ExampleDriver::ID,
+                'enabled' => true,
+                'restart' => 'always',
+                'restartSec' => '2s',
+                'stopSignal' => 'TERM',
+                'stopTimeout' => '10s',
+            ]], 'schedules' => []]),
             'request' => NodeState::requestJsonOf($config),
         ]);
+        $this->driver->query('example::accounts.bootstrap');
+
+        if ($this->state->savedRoleOf($this->driver) !== null) {
+            return;
+        }
 
         $follows = $config->readOnly || ($config->clustered && $config->primary !== null && $config->primary !== $config->ip);
         $this->state->saveRole($this->driver, $follows ? NodeRole::Replica : NodeRole::Primary);
@@ -57,8 +72,6 @@ final readonly class ExampleNodes implements Nodes
 
     public function bootstrap(Secrets $secrets, ?DefaultAccount $account): void
     {
-        $this->driver->query('example::accounts.bootstrap');
-
         if ($account === null) {
             return;
         }
@@ -87,7 +100,7 @@ final readonly class ExampleNodes implements Nodes
             return NodeStatus::stopped();
         }
 
-        return NodeStatus::reported($this->state->roleOf($this->driver), $reply->string('version'));
+        return NodeStatus::reported($this->state->savedRoleOf($this->driver) ?? NodeRole::Replica, $reply->string('version'));
     }
 
     public function metrics(): NodeMetrics

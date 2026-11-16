@@ -11,9 +11,9 @@ use App\Exceptions\Engines\EngineBusy;
 
 final readonly class ExampleState
 {
-    private const string REQUEST = '/srv/example/state/node.json';
+    private const string REQUEST = 'state/node.json';
 
-    private const string ROLE = '/srv/example/state/role';
+    private const string ROLE = 'state/role';
 
     public function __construct(private NodeState $nodeState = new NodeState) {}
 
@@ -22,9 +22,9 @@ final readonly class ExampleState
         return $this->nodeState->requestOf($driver, self::REQUEST) ?? throw new EngineBusy('run node configure first');
     }
 
-    public function roleOf(ExampleDriver $driver): NodeRole
+    public function savedRoleOf(ExampleDriver $driver): ?NodeRole
     {
-        return NodeRole::tryFrom(trim($driver->getFile(self::ROLE) ?? '')) ?? NodeRole::Replica;
+        return NodeRole::tryFrom(trim($driver->getFile(self::ROLE) ?? ''));
     }
 
     public function saveRole(ExampleDriver $driver, NodeRole $role): void

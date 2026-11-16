@@ -28,7 +28,7 @@ src/ExampleDatabasePlugin.php          registers the engine and its scripts
 src/ExampleDriver.php                  facts, groups, query runner and quoting
 src/SqliteSql.php                      SqlQuoting: doubled single quotes, double-quoted names
 src/ExampleState.php                   the node's saved request and role
-src/ExampleNodes.php                   Nodes: configure, start, TLS, ready, status, metrics
+src/ExampleNodes.php                   Nodes: configure and its process manifest, start, TLS, ready, status, metrics
 src/ExampleCluster.php                 Cluster (simulated)
 src/ExampleConfig.php                  Config: one setting, journal_mode
 src/ExampleAccounts.php                Accounts: users, databases, grants
@@ -37,7 +37,6 @@ resources/scripts/nodes/               bash views, plus the metrics query view
 resources/scripts/cluster/             bash view
 resources/scripts/config/              query view
 resources/scripts/accounts/            query views, plus one bash view that removes a file
-resources/scripts/files/               the supervisor manifest
 public/icon.svg                        plugin icon
 public/icons/database-providers/example.svg
 ```
@@ -116,6 +115,6 @@ echo 'The example server is ready.'
 
 1. **Images:** create a repository from [`databasifylabs/engine-template`](https://github.com/databasifylabs/engine-template), point its base at your database's official image and publish `ghcr.io/<owner>/databasify-<engine>`. Make the package public, because Databasify pulls images without credentials.
 2. **Plugin:** copy this repository, change the engine id in `ExampleDriver::ID` and `extra.databasify.engines`, and set the label, category, image, lines and connection.
-3. **Driver:** keep the groups and replace the scripts: your client in `_query`, your units in `files/processes`, your statements in the query views, and real replication in `ExampleCluster`. Write your own `SqlQuoting` if your database quotes differently.
+3. **Driver:** keep the groups and replace the scripts: your client in `_query`, your processes in the manifest `ExampleNodes::configure` builds, your statements in the query views, and real replication in `ExampleCluster`. Write your own `SqlQuoting` if your database quotes differently.
 
 Read more in [Writing plugins](https://docs.databasify.io/plugins/writing-plugins/) and Databasify's [`adding-database-engine`](https://github.com/databasifylabs/databasify/tree/0.x/.claude/skills/adding-database-engine) skill.
